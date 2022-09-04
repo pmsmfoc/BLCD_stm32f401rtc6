@@ -38,7 +38,6 @@ typedef struct
     __IO float  OutMax;
 } PID_TypeDef;
 
-//extern PID_TypeDef  g_location_pid; /* 位置PID参数结构体 */
 extern PID_TypeDef  g_speed_pid;    /* 速度PID参数结构体 */
 /******************************************************************************************/
 /* 外部接口函数 */

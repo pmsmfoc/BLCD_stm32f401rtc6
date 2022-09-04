@@ -246,7 +246,7 @@ uint8_t uemf_edge(uint8_t val)
  */
 void bldc_speed_stop(void)
 {
-    pid_init();                     /* 重新初始化PID，防止积分过大失控 */
+    pid_init();                    /* 重新初始化PID，防止积分过大失控 */
     g_bldc_motor.run_flag = STOP;  /* 标记停机 */
     stop_motor();                  /* 停机 */
     g_bldc_motor.speed = 0;

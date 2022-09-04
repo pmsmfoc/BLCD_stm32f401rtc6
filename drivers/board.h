@@ -70,7 +70,10 @@ extern "C"
 #define BSP_USING_UART1
 #define BSP_UART1_TX_PIN       "PB6"
 #define BSP_UART1_RX_PIN       "PB7"
-
+#define BSP_USING_UART6
+#define BSP_UART6_TX_PIN       "PC6"
+#define BSP_UART6_RX_PIN       "PC7"
+#define BSP_UART6_RX_USING_DMA
 /*-------------------------- UART CONFIG END --------------------------*/
 
 /*-------------------------- I2C CONFIG BEGIN --------------------------*/

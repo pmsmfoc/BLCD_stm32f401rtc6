@@ -1,45 +1,48 @@
 #include "uart.h"
-
-rt_device_t uart4_dev = RT_NULL;
-rt_thread_t uart4_rx_td = RT_NULL;
+#include "bldc.h"
+#include "bldc_tim.h"
+#include "cJSON.h"
+#include "pid.h"
+rt_device_t uart6_dev = RT_NULL;
+rt_thread_t uart6_rx_td = RT_NULL;
 rt_uint32_t rx_len = 0;
 
 
 struct rt_semaphore sem1;
 extern _bldc_obj g_bldc_motor;
-rt_int8_t uart4_init(void)
+rt_int8_t uart6_init(void)
 {
     rt_int8_t ret = 0;
     /*查找设备*/
-    uart4_dev = rt_device_find("uart4");
-    if(uart4_dev == RT_NULL)
+    uart6_dev = rt_device_find("uart6");
+    if(uart6_dev == RT_NULL)
     {
-        rt_kprintf("uart4 not find...\r\n");
+        rt_kprintf("uart6 not find...\r\n");
         return -RT_ERROR;
     }
     /*打开设备*/
-    ret = rt_device_open(uart4_dev,RT_DEVICE_OFLAG_RDWR|RT_DEVICE_FLAG_DMA_RX);
+    ret = rt_device_open(uart6_dev,RT_DEVICE_OFLAG_RDWR|RT_DEVICE_FLAG_DMA_RX);
     if(ret < 0)
     {
-        rt_kprintf("uart4 not open...\r\n");
+        rt_kprintf("uart6 not open...\r\n");
         return ret;
     }
     /*配置串口参数*/
     struct serial_configure serial_cfg = RT_SERIAL_CONFIG_DEFAULT;
-    rt_device_control(uart4_dev,RT_DEVICE_CTRL_CONFIG,(void*)&serial_cfg);
-    /*设置uart4的接收回调函数*/
-    rt_device_set_rx_indicate(uart4_dev,uart4_rx_callback);
+    rt_device_control(uart6_dev,RT_DEVICE_CTRL_CONFIG,(void*)&serial_cfg);
+    /*设置uart6的接收回调函数*/
+    rt_device_set_rx_indicate(uart6_dev,uart6_rx_callback);
     rt_sem_init(&sem1,"sem1",0,RT_IPC_FLAG_FIFO);
     return RT_EOK;
 }
-rt_err_t uart4_rx_callback(rt_device_t dev,rt_size_t size)
+rt_err_t uart6_rx_callback(rt_device_t dev,rt_size_t size)
 {
     rt_sem_release(&sem1);
     rx_len = size;
     return RT_EOK;
 }
 
-void uart4_td_entry(void *parameter)
+void uart6_td_entry(void *parameter)
 {
     //cJSON *Proportion= RT_NULL;
     //cJSON *Integral = RT_NULL;
@@ -58,7 +61,7 @@ void uart4_td_entry(void *parameter)
         /*获取信号量*/
         rt_sem_take(&sem1,RT_WAITING_FOREVER);
         /*读取DMA接收到的数据*/
-        len = rt_device_read(uart4_dev,0,buffer,rx_len);
+        len = rt_device_read(uart6_dev,0,buffer,rx_len);
         /*申请内存*/
         dynamic_buf = rt_malloc(sizeof(char) * len);
         /*copy数据到申请的内存中*/
@@ -94,11 +97,17 @@ void uart4_td_entry(void *parameter)
                 Speed = *cJSON_GetObjectItem(cJSON_Buf, "speed");
             else
                 Speed.valueint = 0;
-            if(Speed.valueint > 4000)
+
+            /* 电机的转速维持再300 ~ 3600 */
+            if(Speed.valueint > SPEED_MAX)
             {
-                Speed.valueint = 4000;
+                Speed.valueint = SPEED_MAX;
             }
-            /*写入参数*/
+            if(Speed.valueint < SPEED_MIN)
+            {
+                Speed.valueint = SPEED_MIN;
+            }
+            /* 写入参数 */
             g_bldc_motor.run_flag = RunFlag.valueint;
             if(g_bldc_motor.run_flag != RUN)
             {
@@ -113,12 +122,6 @@ void uart4_td_entry(void *parameter)
                     /*转向发生改变*/
                     bldc_speed_stop();
                     g_bldc_motor.dir = Dir.valueint;
-                    g_bldc_motor.run_flag = RUN;
-                }
-                /*电机转速小于100rad/min*/
-                if(Speed.valueint <= 100)
-                {
-                    bldc_speed_stop();
                     g_bldc_motor.run_flag = RUN;
                 }
                 start_motor();

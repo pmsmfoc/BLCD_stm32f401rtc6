@@ -82,6 +82,7 @@
 #define RT_USING_DEVICE_IPC
 #define RT_USING_SERIAL
 #define RT_USING_SERIAL_V1
+#define RT_SERIAL_USING_DMA
 #define RT_SERIAL_RB_BUFSZ 64
 #define RT_USING_PIN
 
@@ -215,6 +216,12 @@
 /* entertainment: terminal games and other interesting software packages */
 
 /* end of entertainment: terminal games and other interesting software packages */
+#define PKG_USING_MULTIBUTTON
+#define PKG_USING_MULTIBUTTON_V110
+
+/* MultiButton Options */
+
+/* end of MultiButton Options */
 /* end of miscellaneous packages */
 
 /* Arduino libraries */
@@ -234,6 +241,7 @@
 
 /* Project libraries */
 
+/* end of Project libraries */
 /* end of Arduino libraries */
 /* end of RT-Thread online packages */
 

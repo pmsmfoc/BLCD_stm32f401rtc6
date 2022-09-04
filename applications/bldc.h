@@ -57,6 +57,8 @@ extern _bldc_obj g_bldc_motor;
 #define RUN                         (1)                 /* 电机运动标志 */
 #define STOP                        (0)                 /* 电机停机标志 */
 
+#define SPEED_MAX                   3000                /* 最大转速 */
+#define SPEED_MIN                   300                 /* 最小转速 */
 #define SPEED_COEFF      (uint32_t)((18000/4)*60)       /*旋转一圈变化4个信号，2对级永磁体特性，NSNS共4级数*/
 
 
